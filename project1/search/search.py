@@ -19,6 +19,47 @@ Pacman agents (in searchAgents.py).
 
 import util
 
+
+"""
+Class Node represents the SearchNode
+"""
+class Node:
+    """
+    SearchNode contains information about the current state's
+    coordinates and the previous Node, so it can reconstruct the path.
+
+    state: A tuple of the coordinates
+    previous: Previous node
+    move: A move(directions) that was made to reach this state from the previous one
+    cost: The cost of the move
+    """
+    def __init__(self, state, previous, move, cost):
+        self.state = state
+        self.previous = previous
+        if previous is None:
+            self.cost = cost
+            self.path = []
+        else:
+            self.cost = previous.cost + cost
+            self.path = self.previous.path + [move]
+    
+    """
+    A recursive function tha reconstructs the path and returns it as a
+    list of moves.
+    """
+    def getPath(self):
+        return self.path
+    
+    def __eq__(self, other):
+        if self.previous is None:
+            return isinstance(other, Node) and self.state == other.state
+        return isinstance(other, Node) and (self.state, self.previous.state, self.path) == (other.state, other.previous.state, other.path)
+    
+    def __hash__(self):
+        if self.previous is None:
+            return hash(self.state)
+        return hash((self.state, self.previous.state, tuple(self.path)))
+
 class SearchProblem:
     """
     This class outlines the structure of a search problem, but doesn't implement
@@ -113,9 +154,22 @@ def depthFirstSearch(problem):
     print("Start:", problem.getStartState())
     print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
     """
-    print("Start:", problem.getStartState())
-    print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
+    startNode = Node(problem.getStartState(), None, None, 0)
+    frontier = util.Stack()
+    frontier.push(startNode)
+    expanded = set()
+
+    while not frontier.isEmpty():
+        node = frontier.pop()
+        if problem.isGoalState(node.state):
+            return node.getPath()
+        if not (node in expanded):
+            expanded.add(node)
+            children = problem.expand(node.state)
+            for x in children:
+                frontier.push(Node(x[0], node, x[1], x[2]))
     util.raiseNotDefined()
+
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
