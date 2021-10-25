@@ -154,20 +154,24 @@ def depthFirstSearch(problem):
     print("Start:", problem.getStartState())
     print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
     """
-    startNode = Node(problem.getStartState(), None, None, 0)
+    startNode = (problem.getStartState(), [])
     frontier = util.Stack()
     frontier.push(startNode)
+    """Expanded is a set for faster search. Insert only the state, to avoid visiting already visited nodes"""
     expanded = set()
+
 
     while not frontier.isEmpty():
         node = frontier.pop()
-        if problem.isGoalState(node.state):
-            return node.getPath()
-        if not (node in expanded):
-            expanded.add(node)
-            children = problem.expand(node.state)
+        if problem.isGoalState(node[0]):
+            return node[1]
+        if not (node[0] in expanded):
+            expanded.add(node[0])
+            children = problem.expand(node[0])
             for x in children:
-                frontier.push(Node(x[0], node, x[1], x[2]))
+                tempPath = list(node[1])
+                tempPath.append(x[1])
+                frontier.push((x[0], tempPath))
     util.raiseNotDefined()
 
 
